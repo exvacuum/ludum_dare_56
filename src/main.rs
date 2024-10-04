@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use bevy::{prelude::*, render::mesh::PlaneMeshBuilder};
+use bevy::{ecs::query, prelude::*, render::mesh::PlaneMeshBuilder};
 
 mod ui;
 use ui::*;
@@ -28,35 +28,48 @@ pub struct GameplaySet;
 #[derive(Component, Debug)]
 struct Spin(pub f32);
 
+#[derive(Component, Debug)]
+struct GameObject;
+
 fn main() {
     App::new()
         .add_plugins((DefaultPlugins, UiPlugin))
         .init_state::<AppState>()
         .init_state::<PausedState>()
-        .add_systems(Startup, (hello_world, setup_basic_scene))
-        .add_systems(
+        .add_systems(Startup, hello_world)
+        .add_systems(OnEnter(AppState::InGame), setup_basic_scene)
+        .add_systems(OnExit(AppState::InGame), clean_up_game)
+        .add_systems(Update, (spin).in_set(GameplaySet))
+        .configure_sets(
             Update,
-            (spin).in_set(GameplaySet),
+            (GameplaySet
+                .run_if(in_state(AppState::InGame))
+                .run_if(in_state(PausedState::Running)),),
         )
-        .configure_sets(Update, (
-            GameplaySet.run_if(in_state(AppState::InGame)).run_if(in_state(PausedState::Running)),
-        ))
         .run();
 }
 
 fn setup_basic_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_translation(Vec3::splat(5.0)).looking_at(Vec3::ZERO, Vec3::Y),
-        ..Default::default()
-    });
-
-    commands.spawn(DirectionalLightBundle {
-        transform: Transform::from_translation(Vec3::new(1.0, 1.0, -1.0))
-            .looking_at(Vec3::ZERO, Vec3::Y),
-        ..Default::default()
-    });
+    commands.spawn((
+        GameObject,
+        Camera3dBundle {
+            transform: Transform::from_translation(Vec3::splat(5.0))
+                .looking_at(Vec3::ZERO, Vec3::Y),
+            ..Default::default()
+        },
+    ));
 
     commands.spawn((
+        GameObject,
+        DirectionalLightBundle {
+            transform: Transform::from_translation(Vec3::new(1.0, 1.0, -1.0))
+                .looking_at(Vec3::ZERO, Vec3::Y),
+            ..Default::default()
+        },
+    ));
+
+    commands.spawn((
+        GameObject,
         PbrBundle {
             mesh: asset_server.add(Cuboid::default().mesh().build()),
             material: asset_server.add(StandardMaterial {
@@ -69,11 +82,20 @@ fn setup_basic_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
         Spin(PI),
     ));
 
-    commands.spawn(PbrBundle {
-        mesh: asset_server.add(PlaneMeshBuilder::new(Dir3::Y, Vec2::splat(3.0)).build()),
-        material: asset_server.add(StandardMaterial::default()),
-        ..Default::default()
-    });
+    commands.spawn((
+        GameObject,
+        PbrBundle {
+            mesh: asset_server.add(PlaneMeshBuilder::new(Dir3::Y, Vec2::splat(3.0)).build()),
+            material: asset_server.add(StandardMaterial::default()),
+            ..Default::default()
+        },
+    ));
+}
+
+fn clean_up_game(mut commands: Commands, query: Query<Entity, With<GameObject>>) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
 }
 
 fn hello_world() {
