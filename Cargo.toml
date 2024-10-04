@@ -1,0 +1,6 @@
+[package]
+name = "ludum_dare_56"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
