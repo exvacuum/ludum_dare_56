@@ -2,14 +2,45 @@ use std::f32::consts::PI;
 
 use bevy::{prelude::*, render::mesh::PlaneMeshBuilder};
 
+mod ui;
+use ui::*;
+
+mod player;
+use player::*;
+
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum AppState {
+    #[default]
+    MainMenu,
+    InGame,
+}
+
+#[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
+pub enum PausedState {
+    Paused,
+    #[default]
+    Running,
+}
+
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct GameplaySet;
+
 #[derive(Component, Debug)]
 struct Spin(pub f32);
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins((DefaultPlugins, UiPlugin))
+        .init_state::<AppState>()
+        .init_state::<PausedState>()
         .add_systems(Startup, (hello_world, setup_basic_scene))
-        .add_systems(Update, spin)
+        .add_systems(
+            Update,
+            (spin).in_set(GameplaySet),
+        )
+        .configure_sets(Update, (
+            GameplaySet.run_if(in_state(AppState::InGame)).run_if(in_state(PausedState::Running)),
+        ))
         .run();
 }
 
