@@ -1,5 +1,8 @@
-use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy::{prelude::*, window::PrimaryWindow};
+use bevy_egui::{
+    egui::{self, Align2, Pos2},
+    EguiContexts,
+};
 use leafwing_input_manager::{
     action_state::ActionState, input_map::InputMap, plugin::InputManagerPlugin, Actionlike,
     InputManagerBundle,
@@ -54,14 +57,23 @@ fn show_pause_menu(
     mut egui: EguiContexts,
     mut next_app_state: ResMut<NextState<AppState>>,
     mut next_paused_state: ResMut<NextState<PausedState>>,
+    primary_window_query: Query<&Window, With<PrimaryWindow>>,
 ) {
-    egui::Window::new("Paused").show(egui.ctx_mut(), |ui| {
-        if ui.button("Resume").clicked() {
-            next_paused_state.set(PausedState::Running);
-        }
-        if ui.button("Quit").clicked() {
-            next_app_state.set(AppState::MainMenu);
-            next_paused_state.set(PausedState::Running);
-        }
-    });
+    let primary_window = primary_window_query.single();
+    let window_size = primary_window.size();
+    egui::Window::new("Paused")
+        .pivot(Align2::CENTER_CENTER)
+        .collapsible(false)
+        .movable(false)
+        .resizable(false)
+        .fixed_pos(Pos2::new(window_size.x / 2.0, window_size.y / 2.0))
+        .show(egui.ctx_mut(), |ui| {
+            if ui.button("Resume").clicked() {
+                next_paused_state.set(PausedState::Running);
+            }
+            if ui.button("Quit").clicked() {
+                next_app_state.set(AppState::MainMenu);
+                next_paused_state.set(PausedState::Running);
+            }
+        });
 }
