@@ -1,12 +1,14 @@
-use std::f32::consts::PI;
-
-use bevy::{ecs::query, prelude::*, render::mesh::PlaneMeshBuilder, sprite::{Material2d, MaterialMesh2dBundle, Mesh2dHandle}, utils::warn};
+use avian3d::{debug_render::PhysicsDebugPlugin, PhysicsPlugins};
+use bevy::prelude::*;
 
 mod ui;
 use ui::*;
 
 mod player;
 use player::*;
+
+mod camera;
+use camera::*;
 
 mod bugoid;
 use bugoid::*;
@@ -39,18 +41,32 @@ struct GameObject;
 
 fn main() {
     let mut app = App::new();
-        app.add_plugins((DefaultPlugins, UiPlugin, WorldPlugin, PlayerPlugin))
-        .init_state::<AppState>()
-        .init_state::<PausedState>()
-        .add_systems(OnExit(AppState::InGame), clean_up_game)
-        .configure_sets(
-            Update,
-            (GameplaySet
-                .run_if(in_state(AppState::InGame))
-                .run_if(in_state(PausedState::Running)),),
-        );
-        embed_assets(&mut app);
-        app.run();
+    app.add_plugins((
+        DefaultPlugins,
+        PhysicsPlugins::default(),
+        PhysicsDebugPlugin::default(),
+        UiPlugin,
+        WorldPlugin,
+        PlayerPlugin,
+        CameraPlugin,
+    ))
+    .init_state::<AppState>()
+    .init_state::<PausedState>()
+    .add_systems(OnExit(AppState::InGame), clean_up_game)
+    .configure_sets(
+        Update,
+        (GameplaySet
+            .run_if(in_state(AppState::InGame))
+            .run_if(in_state(PausedState::Running)),),
+    )
+    .configure_sets(
+        PostUpdate,
+        (GameplaySet
+            .run_if(in_state(AppState::InGame))
+            .run_if(in_state(PausedState::Running)),),
+    );
+    embed_assets(&mut app);
+    app.run();
 }
 
 fn clean_up_game(mut commands: Commands, query: Query<Entity, With<GameObject>>) {

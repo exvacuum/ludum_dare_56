@@ -1,3 +1,4 @@
+use avian3d::{collision::{ColliderConstructor, ColliderConstructorHierarchy}, prelude::RigidBody};
 use bevy::prelude::*;
 
 use crate::{AppState, GameObject};
@@ -23,6 +24,8 @@ fn setup_world(mut commands: Commands, asset_server: Res<AssetServer>) {
         SceneBundle {
             scene: asset_server.load(GltfAssetLabel::Scene(0).from_asset("embedded://ludum_dare_56/models/world.glb")),
             ..Default::default()
-        }
+        },
+        ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMesh),
+        RigidBody::Static,
     ));
 }
