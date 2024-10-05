@@ -38,21 +38,9 @@ impl Actionlike for PlayerAction {
 }
 
 #[derive(Component, Debug)]
-pub struct PlayerCamera;
-
-#[derive(Component, Debug)]
 pub struct Player;
 
 fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn((
-        GameObject,
-        PlayerCamera,
-        Camera3dBundle {
-            transform: Transform::from_translation(Vec3::new(0.0, 5.0, 10.0))
-                .looking_at(Vec3::ZERO, Vec3::Y),
-            ..Default::default()
-        },
-    ));
     commands.spawn((
         GameObject,
         Player,

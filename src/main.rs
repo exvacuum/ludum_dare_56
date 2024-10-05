@@ -1,19 +1,14 @@
-use std::f32::consts::PI;
-
 use avian3d::{debug_render::PhysicsDebugPlugin, PhysicsPlugins};
-use bevy::{
-    ecs::query,
-    prelude::*,
-    render::mesh::PlaneMeshBuilder,
-    sprite::{Material2d, MaterialMesh2dBundle, Mesh2dHandle},
-    utils::warn,
-};
+use bevy::prelude::*;
 
 mod ui;
 use ui::*;
 
 mod player;
 use player::*;
+
+mod camera;
+use camera::*;
 
 mod bugoid;
 use bugoid::*;
@@ -53,12 +48,19 @@ fn main() {
         UiPlugin,
         WorldPlugin,
         PlayerPlugin,
+        CameraPlugin,
     ))
     .init_state::<AppState>()
     .init_state::<PausedState>()
     .add_systems(OnExit(AppState::InGame), clean_up_game)
     .configure_sets(
         Update,
+        (GameplaySet
+            .run_if(in_state(AppState::InGame))
+            .run_if(in_state(PausedState::Running)),),
+    )
+    .configure_sets(
+        PostUpdate,
         (GameplaySet
             .run_if(in_state(AppState::InGame))
             .run_if(in_state(PausedState::Running)),),
