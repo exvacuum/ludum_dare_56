@@ -14,6 +14,9 @@ use bugoid::*;
 mod world;
 use world::*;
 
+mod quests;
+use quests::*;
+
 mod embedded_assets;
 use embedded_assets::*;
 
