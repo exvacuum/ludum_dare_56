@@ -22,6 +22,18 @@ use quests::*;
 mod embedded_assets;
 use embedded_assets::*;
 
+mod dialog;
+use dialog::*;
+
+mod interactable;
+use interactable::*;
+
+mod npc;
+use npc::*;
+
+mod billboard;
+use billboard::*;
+
 #[derive(States, Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum AppState {
     #[default]
@@ -47,11 +59,13 @@ fn main() {
     app.add_plugins((
         DefaultPlugins,
         PhysicsPlugins::default(),
-        PhysicsDebugPlugin::default(),
         UiPlugin,
         WorldPlugin,
         PlayerPlugin,
         CameraPlugin,
+        DialogPlugin,
+        NpcPlugin,
+        BillboardPlugin,
     ))
     .init_state::<AppState>()
     .init_state::<PausedState>()

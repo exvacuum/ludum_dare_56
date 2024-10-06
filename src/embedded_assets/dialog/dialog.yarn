@@ -1,0 +1,9 @@
+title: Ant_Start
+---
+???: Fuck my stupid bug life.
+???: Oh hey there! I'm an ant. Sorry for that outburst, you didn't need to hear that.
+Ant: But I'm just so frustrated. I messed up my scent trail and have been walking in circles for hours.
+Ant: You look like a virtuous soul. I can see it in your gentle posture and disarming gaze.
+Ant: Please help me find my home. I live in the anthill, obviously.
+<<start_quest ant_quest>>
+===
