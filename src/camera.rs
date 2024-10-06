@@ -1,9 +1,8 @@
-use std::f32::consts::{PI, TAU};
+use std::f32::consts::PI;
 
 use bevy::prelude::*;
 use leafwing_input_manager::{
-    action_state::ActionState, input_map::InputMap, plugin::InputManagerPlugin,
-    user_input::KeyboardVirtualAxis, Actionlike, InputControlKind, InputManagerBundle,
+    action_state::ActionState, input_map::InputMap, input_processing::{AxisProcessor, WithAxisProcessingPipelineExt}, plugin::InputManagerPlugin, user_input::{KeyboardVirtualAxis, MouseMoveAxis, MouseScrollAxis}, Actionlike, InputControlKind, InputManagerBundle
 };
 
 use crate::{AppState, GameObject, GameplaySet, Player};
@@ -63,10 +62,12 @@ fn setup_camera(mut commands: Commands) {
         InputManagerBundle::with_map(
             InputMap::default()
                 .with_axis(CameraAction::Zoom, KeyboardVirtualAxis::VERTICAL_ARROW_KEYS)
+                .with_axis(CameraAction::Zoom, MouseScrollAxis::Y.with_processor(AxisProcessor::Sensitivity(5.0)))
                 .with_axis(
                     CameraAction::Rotate,
                     KeyboardVirtualAxis::HORIZONTAL_ARROW_KEYS,
-                ),
+                )
+                .with_axis(CameraAction::Rotate, MouseMoveAxis::X),
         ),
     ));
 }
@@ -121,7 +122,15 @@ fn apply_camera_controls(
             let [player_transform, mut camera_transform] =
                 transform_query.many_mut([player_entity, camera_entity]);
 
-            camera_transform.rotate_around(player_transform.translation, Quat::from_euler(EulerRot::XYZ, 0.0, rotation_input.value * ROTATE_SPEED * delta, 0.0));
+            camera_transform.rotate_around(
+                player_transform.translation,
+                Quat::from_euler(
+                    EulerRot::XYZ,
+                    0.0,
+                    -rotation_input.value * ROTATE_SPEED * delta,
+                    0.0,
+                ),
+            );
             camera.offset = Some(camera_transform.translation - player_transform.translation);
         }
     }
