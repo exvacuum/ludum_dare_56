@@ -1,10 +1,13 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::{
+    prelude::*,
+    window::{CursorGrabMode, PrimaryWindow},
+};
 use bevy_egui::{
-    egui::{self, Align, Align2, Color32, Direction, Layout, Pos2},
+    egui::{self},
     EguiContexts,
 };
 
-use crate::AppState;
+use crate::{AppState, GAME_TITLE};
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MainMenuSet;
@@ -22,18 +25,27 @@ fn show_main_menu(
     mut egui: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
     mut exit_event_writer: EventWriter<AppExit>,
-    primary_window_query: Query<&Window, With<PrimaryWindow>>,
+    mut primary_window_query: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    let primary_window = primary_window_query.single();
-    let window_size = primary_window.size();
-    egui::Window::new("Epic Game")
-        .pivot(Align2::CENTER_CENTER)
-        .collapsible(false)
-        .movable(false)
-        .resizable(false)
-        .fixed_pos(Pos2::new(window_size.x / 2.0, window_size.y / 2.0))
-        .show(egui.ctx_mut(), |ui| {
-            ui.vertical_centered(|ui| {
+    let mut primary_window = primary_window_query.single_mut();
+
+    primary_window.cursor.grab_mode = CursorGrabMode::None;
+    primary_window.cursor.visible = true;
+
+    egui::CentralPanel::default().show(egui.ctx_mut(), |ui| {
+        ui.vertical(|ui| {
+            ui.add(egui::Label::new(egui::RichText::new(GAME_TITLE).strong().size(32.0)).wrap());
+            ui.horizontal(|ui| {
+                ui.label("A game by");
+                if ui.link("Silas").clicked() {
+                    let _ = webbrowser::open("https://github.com/exvacuum");
+                }
+                ui.label("and");
+                if ui.link("Carter").clicked() {
+                    let _ = webbrowser::open("https://github.com/hyperliskdev");
+                }
+            });
+            ui.horizontal(|ui| {
                 if ui.button("Play").clicked() {
                     next_state.set(AppState::InGame);
                 }
@@ -42,4 +54,5 @@ fn show_main_menu(
                 }
             });
         });
+    });
 }

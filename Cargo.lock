@@ -2908,6 +2908,7 @@ dependencies = [
  "bevy_egui",
  "bevy_yarnspinner",
  "leafwing-input-manager",
+ "webbrowser",
 ]
 
 [[package]]

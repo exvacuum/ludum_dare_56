@@ -12,9 +12,11 @@ avian3d = "0.1"
 bevy-tnua = "0.19"
 bevy-tnua-avian3d = "0.1"
 bevy_yarnspinner = "0.3"
+webbrowser = "1.0.2"
 
 [dependencies.bevy]
 version = "0.14"
+features = ["wayland"]
 
 [dependencies.bevy_egui]
 version = "0.30"

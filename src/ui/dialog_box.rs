@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 
-use crate::PlayerState;
+use crate::{GameplaySet, PlayerState};
 
 pub struct DialogBoxPlugin;
 
@@ -9,7 +9,7 @@ impl Plugin for DialogBoxPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            show_dialog_box.run_if(in_state(PlayerState::Dialog)),
+            show_dialog_box.in_set(GameplaySet).run_if(in_state(PlayerState::Dialog)),
         )
         .init_resource::<DialogBoxContent>();
     }

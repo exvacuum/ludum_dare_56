@@ -1,7 +1,11 @@
-use bevy::{prelude::*, app::Plugin, prelude::{Component, Query}, transform::components::Transform};
+use bevy::{
+    app::Plugin,
+    prelude::*,
+    prelude::{Component, Query},
+    transform::components::Transform,
+};
 
 use crate::{GameCamera, GameplaySet};
-
 
 pub struct BillboardPlugin;
 
@@ -18,8 +22,9 @@ fn update_billboards(
     camera_query: Query<&Transform, With<GameCamera>>,
     mut billboard_query: Query<&mut Transform, (With<Billboard>, Without<GameCamera>)>,
 ) {
-    let camera_transform = camera_query.single();
-    for mut billboard_transform in billboard_query.iter_mut() {
-        billboard_transform.look_to(*camera_transform.back(), Vec3::Y);
+    if let Ok(camera_transform) = camera_query.get_single() {
+        for mut billboard_transform in billboard_query.iter_mut() {
+            billboard_transform.look_to(*camera_transform.back(), Vec3::Y);
+        }
     }
 }
